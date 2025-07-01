@@ -1,0 +1,49 @@
+﻿2025-06-30 21:26:14 [INFO] - INICIANDO: Preparacion del paquete Lambda
+2025-06-30 21:26:14 [INFO] - VALIDACION: .NET Framework disponible
+2025-06-30 21:26:14 [INFO] - LIMPIEZA: Limpiando carpetas si existen
+2025-06-30 21:26:14 [INFO] - SETUP: Creando carpetas de trabajo
+2025-06-30 21:26:14 [INFO] - DEPENDENCIAS: Instalando dependencias desde requirements.txt
+2025-06-30 21:26:15 [INFO] - DEPENDENCIAS: Ejecutando pip install
+2025-06-30 21:27:28 [INFO] - DEPENDENCIAS: Instalacion exitosa - Se detectaron 5 paquetes principales
+2025-06-30 21:27:28 [INFO] -   - openpyxl instalado
+2025-06-30 21:27:28 [INFO] -   - openpyxl-3.1.5.dist-info instalado
+2025-06-30 21:27:28 [INFO] -   - pandas instalado
+2025-06-30 21:27:28 [INFO] -   - pandas-2.3.0.dist-info instalado
+2025-06-30 21:27:28 [INFO] -   - pandas.libs instalado
+2025-06-30 21:27:28 [INFO] - VERIFICACION: Total de 32 directorios de paquetes en build
+2025-06-30 21:27:28 [INFO] - COPIA: Copiando archivos fuente con exclusiones agresivas
+2025-06-30 21:27:32 [INFO] - COPIA: Se copiaron 18 archivos (0.12 MB), se excluyeron 16435
+2025-06-30 21:27:32 [INFO] - EXCLUSION: Se excluyeron 4657 archivos de entornos virtuales
+2025-06-30 21:27:32 [INFO] - OPTIMIZACION: Optimizando dependencias pesadas para AWS Lambda
+2025-06-30 21:27:33 [INFO] - OPTIMIZACION: Removido tests de pandas
+2025-06-30 21:27:33 [INFO] - OPTIMIZACION: Removido _testing de pandas
+2025-06-30 21:27:33 [INFO] - OPTIMIZACION: Removido tests de numpy
+2025-06-30 21:27:33 [INFO] - OPTIMIZACION: Optimizacion de dependencias completada
+2025-06-30 21:27:33 [INFO] - CONTEO: Se empaquetaran 4424 archivos en total (post-optimizacion)
+2025-06-30 21:27:33 [INFO] - VERIFICACION: Se encontraron 1114 archivos Python
+2025-06-30 21:27:33 [INFO] - COMPRESION: Empaquetando ZIP con compresion Optimal
+2025-06-30 21:28:01 [SUCCESS] - EXITO: ZIP creado en: C:\Proyectos\Popular\Lambdas\file_reader_lambda\Publicar\file_reader_lambda_20250630_212733.zip
+2025-06-30 21:28:01 [INFO] - VALIDACION: Validando integridad del ZIP
+2025-06-30 21:28:02 [SUCCESS] - EXITO: ZIP contiene 4424 entradas
+2025-06-30 21:28:02 [INFO] - TAMANO: ZIP final de 52.82 MB
+2025-06-30 21:28:02 [INFO] - ACTIVANDO: Separacion automatica por tamaÃ±o (52.82 MB)
+2025-06-30 21:28:02 [INFO] - SEPARACION: Iniciando separacion automatica en funcion y layer
+2025-06-30 21:28:10 [INFO] - SEPARACION: 25 items para layer, 12 items para funcion
+2025-06-30 21:28:24 [INFO] - SEPARACION: function.zip creado exitosamente
+2025-06-30 21:28:55 [INFO] - SEPARACION: dependencies-layer.zip creado exitosamente
+2025-06-30 21:28:57 [SUCCESS] - EXITO: Paquetes separados creados exitosamente
+2025-06-30 21:28:57 [INFO] - FUNCION: function.zip (24.6 MB)
+2025-06-30 21:28:57 [INFO] - LAYER: dependencies-layer.zip (28.4 MB)
+2025-06-30 21:28:57 [INFO] - INSTRUCCIONES: Archivo generado en: deploy-instructions.txt
+2025-06-30 21:28:57 [SUCCESS] - EXITO: Instrucciones generadas en: deploy-instructions.txt
+2025-06-30 21:28:57 [INFO] - ========================================
+2025-06-30 21:28:57 [SUCCESS] - RESULTADO: Separacion automatica completada
+2025-06-30 21:28:57 [INFO] - - function.zip (24.6 MB) - Tu codigo de aplicacion
+2025-06-30 21:28:57 [INFO] - - dependencies-layer.zip (28.4 MB) - Dependencias Python
+2025-06-30 21:28:57 [INFO] - - deploy-instructions.txt - Instrucciones completas
+2025-06-30 21:28:57 [INFO] - - file_reader_lambda_20250630_212733.zip (52.82 MB) - Paquete original (referencia)
+2025-06-30 21:28:57 [INFO] - ========================================
+2025-06-30 21:28:57 [SUCCESS] - SIGUIENTE PASO: Revisar deploy-instructions.txt para subir a AWS
+2025-06-30 21:28:59 [INFO] - LIMPIEZA: Carpeta build eliminada
+2025-06-30 21:28:59 [INFO] - COMPLETADO: Paquete listo para AWS Lambda
+2025-06-30 21:28:59 [INFO] - UBICACION: C:\Proyectos\Popular\Lambdas\file_reader_lambda\Publicar\file_reader_lambda_20250630_212733.zip
