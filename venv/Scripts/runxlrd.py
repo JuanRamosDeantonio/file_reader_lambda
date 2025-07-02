@@ -1,4 +1,4 @@
-#!C:\Proyectos\Popular\Lambdas\file_reader_lambda\venv\Scripts\python.exe
+#!C:\Proyectos\poc_popular\file_reader_lambda\venv\Scripts\python.exe
 # Copyright (c) 2005-2012 Stephen John Machin, Lingfo Pty Ltd
 # This script is part of the xlrd package, which is released under a
 # BSD-style licence.

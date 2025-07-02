@@ -8,7 +8,7 @@ from .base_reader import BaseReader
 from .csv_reader import CsvReader
 from .docx_reader import DocxReader
 from .json_reader import JsonReader
-from .pdf_reader import PdfReader
+
 from .txt_reader import TxtReader
 from .xml_reader import XmlReader
 from .yaml_reader import YamlReader
@@ -18,7 +18,6 @@ __all__ = [
     'CsvReader', 
     'DocxReader',
     'JsonReader',
-    'PdfReader',
     'TxtReader',
     'XmlReader',
     'YamlReader'

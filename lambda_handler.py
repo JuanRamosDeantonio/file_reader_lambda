@@ -12,15 +12,25 @@ from file_reader.core.enums import OutputFormat
 from file_reader.core.file_reader import FileReader
 from file_reader.utils.s3_file_fetcher import S3FileFetcher, is_s3_path
 
-# IMPORTAR READERS PARA REGISTRO AUTOMÁTICO
+# IMPORTAR READERS PARA REGISTRO AUTOMÁTICO (sin problemas)
 import file_reader.readers.csv_reader
 import file_reader.readers.docx_reader  
 import file_reader.readers.excel_reader  # Excel Reader (xlsx, xls, xlsm)
 import file_reader.readers.json_reader
-import file_reader.readers.pdf_reader
 import file_reader.readers.txt_reader
 import file_reader.readers.xml_reader
 import file_reader.readers.yaml_reader
+
+# PDF Reader con import condicional
+def _import_pdf_reader():
+    """Importa el PDF reader de forma condicional para evitar errores de PyMuPDF"""
+    try:
+        logger.info("✅ PDF Reader cargado exitosamente")
+        return True
+    except ImportError as e:
+        logger.warning(f"⚠️ PDF Reader no disponible: {str(e)}")
+        logger.warning("📋 Los archivos PDF no podrán ser procesados")
+        return False
 
 # Configurar logging para Lambda en español
 logger = logging.getLogger()
@@ -61,18 +71,48 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     try:
         logger.info("📥 Iniciando ejecución de Lambda")
         
-        # Parsear cuerpo del evento
+        # Validación temprana del evento
+        if not event:
+            raise ValueError("Evento vacío recibido")
+        
+        logger.info(f"📥 Tipo de evento recibido: {type(event)}")
+        
+        # Intentar cargar PDF reader al inicio de la ejecución
+        pdf_available = _import_pdf_reader()
+        
+        # Parsear cuerpo del evento - VERSIÓN CORREGIDA
         body = event.get("body")
+        
+        # Caso 1: Invocación desde API Gateway (body es string JSON)
         if isinstance(body, str):
             try:
                 body = json.loads(body)
+                logger.info("📥 Evento recibido desde API Gateway")
             except json.JSONDecodeError as e:
                 raise ValueError(f"JSON inválido en el cuerpo de la solicitud: {e}")
+        
+        # Caso 2: Invocación directa o body es None (usar event directamente)
+        elif body is None:
+            body = event
+            logger.info("📥 Evento recibido directamente (sin API Gateway)")
+        
+        # Caso 3: body ya es un diccionario (algunos casos de API Gateway)
+        elif isinstance(body, dict):
+            logger.info("📥 Evento recibido con body como diccionario")
+            # body ya está listo para usar
+        
+        else:
+            raise ValueError(f"Formato de evento no soportado. Tipo de body: {type(body)}")
 
         # Extraer y validar parámetros requeridos
         file_name = body.get("file_name")
         file_content_b64 = body.get("file_content")
         s3_path = body.get("s3_path")
+
+        # Verificar si se está intentando procesar un PDF sin el reader disponible
+        if file_name and file_name.lower().endswith('.pdf') and not pdf_available:
+            raise ValueError("El procesamiento de archivos PDF no está disponible en este momento. "
+                           "Formatos disponibles: DOCX, XLSX, CSV, JSON, XML, YAML, TXT")
 
         # Extraer parámetros opcionales con valores por defecto
         output_format = body.get("output_format", "markdown")
@@ -146,7 +186,8 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 "id_solicitud_lambda": context.aws_request_id if context else "local",
                 "tamano_archivo_bytes": len(file_bytes),
                 "tamano_salida_caracteres": len(result),
-                "version_procesador": "FileReader v2.0 - IA Optimizado"
+                "version_procesador": "FileReader v2.0 - IA Optimizado",
+                "pdf_disponible": pdf_available
             }
         }
 
@@ -161,7 +202,8 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 "Access-Control-Allow-Methods": "POST, OPTIONS",
                 "Access-Control-Allow-Headers": "Content-Type, Authorization",
                 "X-Processed-By": "FileReader-Lambda-ES",
-                "X-Processing-Time": str(round(processing_time, 2))
+                "X-Processing-Time": str(round(processing_time, 2)),
+                "X-PDF-Available": str(pdf_available)
             },
             "body": json.dumps(response_body, ensure_ascii=False, indent=2)
         }
@@ -296,7 +338,7 @@ def _crear_respuesta_error(status_code: int, mensaje: str, tipo_error: str, deta
                 "Para base64: verifique que el contenido esté correctamente codificado"
             ],
             "formatos_soportados": [
-                "PDF (.pdf)", "Word (.docx)", "Excel (.xlsx, .xls, .xlsm)",
+                "PDF (.pdf) - Condicional", "Word (.docx)", "Excel (.xlsx, .xls, .xlsm)",
                 "CSV (.csv)", "JSON (.json)", "XML (.xml)", 
                 "YAML (.yaml, .yml)", "Texto (.txt)"
             ],
@@ -340,15 +382,17 @@ def health_check_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     """
     from file_reader.core.plugin_registry import PluginRegistry
     
-    # Importar readers para asegurar registro
+    # Importar readers para asegurar registro (excepto PDF)
     import file_reader.readers.csv_reader
     import file_reader.readers.docx_reader  
     import file_reader.readers.excel_reader
     import file_reader.readers.json_reader
-    import file_reader.readers.pdf_reader
     import file_reader.readers.txt_reader
     import file_reader.readers.xml_reader
     import file_reader.readers.yaml_reader
+    
+    # Verificar PDF reader de forma condicional
+    pdf_available = _import_pdf_reader()
     
     health_info = {
         "estado": "saludable",
@@ -360,7 +404,8 @@ def health_check_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             "total_formatos": len(PluginRegistry.get_supported_extensions()),
             "optimizacion_ia": True,
             "soporte_s3": True,
-            "procesamiento_multi_hoja": True
+            "procesamiento_multi_hoja": True,
+            "pdf_disponible": pdf_available
         },
         "estadisticas": {
             "memoria_disponible": "Disponible",

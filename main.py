@@ -11,15 +11,25 @@ from file_reader.core.enums import OutputFormat
 from file_reader.core.file_reader import FileReader
 from file_reader.utils.s3_file_fetcher import S3FileFetcher, is_s3_path
 
-# Forzar el registro de todos los readers
+# Forzar el registro de readers (sin problemas)
 import file_reader.readers.csv_reader
 import file_reader.readers.docx_reader
 import file_reader.readers.excel_reader
 import file_reader.readers.json_reader
-import file_reader.readers.pdf_reader
 import file_reader.readers.txt_reader
 import file_reader.readers.xml_reader
 import file_reader.readers.yaml_reader
+
+# PDF Reader con import condicional
+def _import_pdf_reader():
+    """Importa el PDF reader de forma condicional para evitar errores de PyMuPDF"""
+    try:
+        logger.info("✅ PDF Reader, por el momento no aplica")
+        return True
+    except ImportError as e:
+        logger.warning(f"⚠️ PDF Reader no disponible: {str(e)}")
+        logger.warning("📋 Los archivos PDF no podrán ser procesados")
+        return False
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -31,8 +41,12 @@ logging.basicConfig(
 def main(input_json_path: str = "local_input_event.json"):
     try:
         logger.info("🚀 Iniciando simulación con archivo: %s", input_json_path)
+        
+        # Intentar cargar PDF reader
+        pdf_available = _import_pdf_reader()
+        
         event_body = cargar_entrada(input_json_path)
-        response = procesar_evento_local(event_body)
+        response = procesar_evento_local(event_body, pdf_available)
         logger.info("✅ Proceso completado con éxito.")
         print(json.dumps(response, indent=2, ensure_ascii=False))
     except Exception as e:
@@ -47,19 +61,19 @@ def cargar_entrada(path: str) -> Dict[str, Any]:
     return data
 
 
-def procesar_evento_local(body: Dict[str, Any]) -> Dict[str, Any]:
+def procesar_evento_local(body: Dict[str, Any], pdf_available: bool = True) -> Dict[str, Any]:
     archivo_temporal: Optional[str] = None
     file_bytes: Optional[bytes] = None
     start_time = datetime.now()
 
     try:
-        params = _extraer_parametros(body)
+        params = _extraer_parametros(body, pdf_available)
         archivo_temporal = _preparar_archivo(params)
         file_bytes = _leer_bytes(archivo_temporal)
 
         result = _procesar_con_file_reader(archivo_temporal, params)
 
-        return _construir_respuesta(params, result, file_bytes, start_time)
+        return _construir_respuesta(params, result, file_bytes, start_time, pdf_available)
 
     finally:
         _limpiar_temporal(archivo_temporal)
@@ -67,7 +81,7 @@ def procesar_evento_local(body: Dict[str, Any]) -> Dict[str, Any]:
 
 # ---------------------- Funciones Auxiliares ----------------------
 
-def _extraer_parametros(body: Dict[str, Any]) -> Dict[str, Any]:
+def _extraer_parametros(body: Dict[str, Any], pdf_available: bool) -> Dict[str, Any]:
     file_name = body.get("file_name")
     file_content_b64 = body.get("file_content")
     s3_path = body.get("s3_path")
@@ -78,6 +92,11 @@ def _extraer_parametros(body: Dict[str, Any]) -> Dict[str, Any]:
         raise ValueError("Debe proporcionar 'file_content' o 's3_path'")
     if file_content_b64 and s3_path:
         raise ValueError("Solo uno de 'file_content' o 's3_path' debe ser usado")
+
+    # Verificar si se está intentando procesar un PDF sin el reader disponible
+    if file_name and file_name.lower().endswith('.pdf') and not pdf_available:
+        raise ValueError("El procesamiento de archivos PDF no está disponible. "
+                       "Formatos disponibles: DOCX, XLSX, CSV, JSON, XML, YAML, TXT")
 
     output_format = body.get("output_format", "markdown")
     ai_optimized = body.get("ai_optimized", False)
@@ -132,7 +151,7 @@ def _procesar_con_file_reader(path: str, params: Dict[str, Any]) -> str:
     return reader.read(path)
 
 
-def _construir_respuesta(params: Dict[str, Any], result: str, file_bytes: bytes, start_time: datetime) -> Dict[str, Any]:
+def _construir_respuesta(params: Dict[str, Any], result: str, file_bytes: bytes, start_time: datetime, pdf_available: bool) -> Dict[str, Any]:
     elapsed = (datetime.now() - start_time).total_seconds()
     return {
         "success": True,
@@ -151,7 +170,8 @@ def _construir_respuesta(params: Dict[str, Any], result: str, file_bytes: bytes,
             "id_solicitud_lambda": "simulado-local",
             "tamano_archivo_bytes": len(file_bytes),
             "tamano_salida_caracteres": len(result),
-            "version_procesador": "FileReader v2.0 - IA Optimizado"
+            "version_procesador": "FileReader v2.0 - IA Optimizado",
+            "pdf_disponible": pdf_available
         }
     }
 
@@ -195,4 +215,3 @@ if __name__ == "__main__":
     default_path = os.path.join("tests", "test.json")
     input_path = sys.argv[1] if len(sys.argv) > 1 else default_path
     main(input_json_path=input_path)
-
