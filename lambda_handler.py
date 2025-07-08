@@ -121,6 +121,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         extract_key_sections = body.get("extract_key_sections", False)
         max_chunk_size = body.get("max_chunk_size", 4000)
         region = body.get("region")  # Región AWS opcional
+        processing_images = body.get("processing_images", False)
 
         # Validar entradas requeridas
         if not file_name:
@@ -158,7 +159,8 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             ai_optimized=ai_optimized,
             include_metadata=include_metadata,
             extract_key_sections=extract_key_sections,
-            max_chunk_size=max_chunk_size
+            max_chunk_size=max_chunk_size,
+            processing_images=processing_images
         )
 
         logger.info(f"🔄 Procesando archivo con formato: {output_format}, IA: {ai_optimized}")

@@ -104,6 +104,7 @@ def _extraer_parametros(body: Dict[str, Any], pdf_available: bool) -> Dict[str, 
     extract_key_sections = body.get("extract_key_sections", False)
     max_chunk_size = body.get("max_chunk_size", 4000)
     region = body.get("region")
+    proccesing_images = body.get("processing_images", False)
 
     try:
         output_format_enum = OutputFormat(output_format)
@@ -120,7 +121,8 @@ def _extraer_parametros(body: Dict[str, Any], pdf_available: bool) -> Dict[str, 
         "ai_optimized": ai_optimized,
         "include_metadata": include_metadata,
         "extract_key_sections": extract_key_sections,
-        "max_chunk_size": max_chunk_size
+        "max_chunk_size": max_chunk_size,
+        "processing_images": proccesing_images
     }
 
 
@@ -144,7 +146,8 @@ def _procesar_con_file_reader(path: str, params: Dict[str, Any]) -> str:
         ai_optimized=params["ai_optimized"],
         include_metadata=params["include_metadata"],
         extract_key_sections=params["extract_key_sections"],
-        max_chunk_size=params["max_chunk_size"]
+        max_chunk_size=params["max_chunk_size"],
+        processing_images=params["processing_images"]
     )
     logger.info("⚙️ Ejecutando FileReader con config: %s", config.__dict__)
     reader = FileReader(config)

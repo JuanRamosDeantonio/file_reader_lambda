@@ -7,12 +7,14 @@ class FileReaderConfig:
                  ai_optimized: bool = False,
                  include_metadata: bool = False,
                  max_chunk_size: int = 4000,
-                 extract_key_sections: bool = False):
+                 extract_key_sections: bool = False,
+                 processing_images : bool = False):
         self.output_format = output_format
         self.ai_optimized = ai_optimized
         self.include_metadata = include_metadata
         self.max_chunk_size = max_chunk_size
         self.extract_key_sections = extract_key_sections
+        self.processing_images = processing_images
         
         # Auto-enable AI features for markdown_ai format
         if output_format == OutputFormat.MARKDOWN_AI:

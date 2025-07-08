@@ -152,8 +152,15 @@ class DocxReader(BaseReader):
         try:
             # Configurar opciones de Mammoth para mejor output
             with open(file_path, "rb") as docx_file:
-                result = self._mammoth_module.convert_to_markdown(docx_file, 
+
+                result = ''
+
+                if self.config.processing_images:
+                    result = self._mammoth_module.convert_to_markdown(docx_file)
+                else:
+                    result = self._mammoth_module.convert_to_markdown(docx_file, 
                         convert_image=self._mammoth_module.images.img_element(lambda image : ""))
+                
                 base_markdown = result.value
                 
                 # Verificar que se generó contenido
