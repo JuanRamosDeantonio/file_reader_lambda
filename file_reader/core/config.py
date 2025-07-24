@@ -24,16 +24,16 @@ class FileReaderConfig:
 
     @staticmethod
     def from_env() -> 'FileReaderConfig':
-        format_str = os.getenv("OUTPUT_FORMAT", "markdown").lower()
+        format_str = os.getenv("OUTPUT_FORMAT").lower()
         try:
             output_format = OutputFormat(format_str)
         except ValueError:
             output_format = OutputFormat.MARKDOWN
         
-        ai_optimized = os.getenv("AI_OPTIMIZED", "false").lower() == "true"
-        include_metadata = os.getenv("INCLUDE_METADATA", "false").lower() == "true"
-        max_chunk_size = int(os.getenv("MAX_CHUNK_SIZE", "4000"))
-        extract_key_sections = os.getenv("EXTRACT_KEY_SECTIONS", "false").lower() == "true"
+        ai_optimized = os.getenv("AI_OPTIMIZED").lower() == "true"
+        include_metadata = os.getenv("INCLUDE_METADATA").lower() == "true"
+        max_chunk_size = int(os.getenv("MAX_CHUNK_SIZE"))
+        extract_key_sections = os.getenv("EXTRACT_KEY_SECTIONS").lower() == "true"
         
         return FileReaderConfig(
             output_format=output_format,
