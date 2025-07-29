@@ -3,6 +3,7 @@ from file_reader.core.plugin_registry import PluginRegistry
 from file_reader.core.enums import OutputFormat
 import re
 
+@PluginRegistry.register("default")
 @PluginRegistry.register("txt")
 class TxtReader(BaseReader):
     def read(self, file_path: str) -> str:

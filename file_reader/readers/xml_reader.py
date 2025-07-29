@@ -4,6 +4,9 @@ from file_reader.readers.base_reader import BaseReader
 from file_reader.core.plugin_registry import PluginRegistry
 from file_reader.core.enums import OutputFormat
 
+@PluginRegistry.register("descriptor")
+@PluginRegistry.register("project")
+@PluginRegistry.register("msgflow")
 @PluginRegistry.register("xml")
 class XmlReader(BaseReader):
     def read(self, file_path: str) -> str:

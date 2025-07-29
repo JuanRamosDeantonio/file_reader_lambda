@@ -60,13 +60,13 @@ class FileReader:
         if not ext:
             raise ValueError(f"El archivo no tiene extensión: {file_path}")
         
+        if ext == "pdf" or ext == "bar":
+            raise ValueError("Extension no soportada")
+            
+        
         # Verificar si la extensión está soportada
         if not PluginRegistry.is_supported(ext):
-            supported = ", ".join(sorted(PluginRegistry.get_supported_extensions()))
-            raise ValueError(
-                f"Extensión de archivo no soportada '{ext}'. "
-                f"Extensiones soportadas: {supported}"
-            )
+            ext = "default"
         
         # Obtener e instanciar el reader apropiado
         reader_cls = PluginRegistry.get_reader(ext)
