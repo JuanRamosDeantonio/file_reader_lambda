@@ -11,6 +11,7 @@ from file_reader.core.config import FileReaderConfig
 from file_reader.core.enums import OutputFormat
 from file_reader.core.file_reader import FileReader
 from file_reader.utils.s3_file_fetcher import S3FileFetcher, is_s3_path
+import boto3
 
 # IMPORTAR READERS PARA REGISTRO AUTOMÁTICO (sin problemas)
 import file_reader.readers.csv_reader
@@ -76,6 +77,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             raise ValueError("Evento vacío recibido")
         
         logger.info(f"📥 Tipo de evento recibido: {type(event)}")
+        logger.info(f"El evento que se recibe es {event}")
         
         # Intentar cargar PDF reader al inicio de la ejecución
         pdf_available = _import_pdf_reader()
@@ -108,6 +110,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         file_name = body.get("file_name")
         file_content_b64 = body.get("file_content")
         s3_path = body.get("s3_path")
+        bucket_name = body.get("bucket_name")
 
         # Verificar si se está intentando procesar un PDF sin el reader disponible
         if file_name and file_name.lower().endswith('.pdf') and not pdf_available:
@@ -132,6 +135,8 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
 
         if file_content_b64 and s3_path:
             raise ValueError("No puede proporcionar tanto 'file_content' como 's3_path'. Elija un método de entrada")
+        
+        built_s3_path = f's3://{bucket_name}/{s3_path}'
 
         # Validar formato de salida
         try:
@@ -147,7 +152,7 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
         else:  # s3_path
             logger.info(f"📂 Procesando archivo S3: {s3_path}")
-            tmp_file_path = _procesar_archivo_s3(s3_path, region)
+            tmp_file_path = _procesar_archivo_s3(built_s3_path, region)
 
         # Leer tamaño de archivo para metadata
         with open(tmp_file_path, "rb") as f:
